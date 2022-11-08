@@ -1,0 +1,9 @@
+todo:
+- insert form (include js data validation, if db throws error, show user)
+- update button on each row (should fill out form for user but button calls update method)
+- delete button on each row (include are you sure prompt)
+
+if have time:
+- conditions (where, having, order by, group by, etc...)
+- limit rows shown to user (with option to set row amount)
+
