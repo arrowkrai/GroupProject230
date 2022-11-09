@@ -51,7 +51,6 @@ function App() {
         const fetchColumns = async () => {
             try {
                 const res = await axios.get("http://localhost:8888")
-                formatTables(res.data)
                 setTables(formatTables(res.data))
             } catch (err) {
                 console.log(err)
@@ -82,20 +81,6 @@ function App() {
                     <p className="text-secondary m-3">Search tables</p>
                 )}
             </div>
-            {/*{<Checkboxes tables={tst} />}*/}
-            {/*{tables.forEach((c) => console.log(JSON.stringify(c)))}*/}
-
-            {/*<section className="app__getInsert">*/}
-            {/*    {Object.keys(tables).map((table, i) => (*/}
-            {/*        <div className="app__table" key={i}>*/}
-            {/*            {tables[table].map((col, j) => (*/}
-            {/*                <div className="app__col" key={j}>*/}
-            {/*                    {col}*/}
-            {/*                </div>*/}
-            {/*            ))}*/}
-            {/*        </div>*/}
-            {/*    ))}*/}
-            {/*</section>*/}
         </div>
     )
 }

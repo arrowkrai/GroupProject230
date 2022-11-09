@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import CheckboxTree from "react-checkbox-tree"
 import "react-checkbox-tree/lib/react-checkbox-tree.css"
 
