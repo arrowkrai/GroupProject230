@@ -1,5 +1,7 @@
 # How to setup your local dev enviroment with test database.
 
+This video from Elijah may also serve as an aid: https://www.youtube.com/watch?v=Mu3bTzChsYY
+
 ## Prerequisites: NodeJS, Git, and an IDE (Visual Studio Code reccomended) are setup and configured on your machine.
 
 ### Setting up code enviroment
