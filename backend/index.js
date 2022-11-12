@@ -23,9 +23,18 @@ app.get("/", async (req, res) => {
 
         for (const result of results) {
             if (tables[result.TABLE_NAME] === undefined) {
-                tables[result.TABLE_NAME] = [result.COLUMN_NAME]
+                tables[result.TABLE_NAME] = [
+                    `${result.COLUMN_NAME}.${result.COLUMN_TYPE}.${
+                        result.IS_NULLABLE === "YES" ? "OPTIONAL" : "REQUIRED"
+                    }`,
+                ]
             } else {
-                tables[result.TABLE_NAME] = [...tables[result.TABLE_NAME], result.COLUMN_NAME]
+                tables[result.TABLE_NAME] = [
+                    ...tables[result.TABLE_NAME],
+                    `${result.COLUMN_NAME}.${result.COLUMN_TYPE}.${
+                        result.IS_NULLABLE === "YES" ? "OPTIONAL" : "REQUIRED"
+                    }`,
+                ]
             }
         }
 
