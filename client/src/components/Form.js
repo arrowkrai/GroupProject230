@@ -10,7 +10,7 @@ function initializeInput(children) {
     return result
 }
 
-function Form({ tables, insertTableName }) {
+function Form({ tables, insertTableName, handleInsert }) {
     let children = []
     for (const table of tables) {
         if (table.value === insertTableName) {
@@ -58,10 +58,24 @@ function Form({ tables, insertTableName }) {
                 })}
 
                 <div className="my-3">
-                    <button className="btn btn-primary btn-sm" type="button">
+                    <button
+                        className="btn btn-primary btn-sm"
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            handleInsert(inputs)
+                        }}
+                    >
                         Submit
                     </button>
-                    <button className="btn btn-danger btn-sm ms-3" type="button">
+                    <button
+                        className="btn btn-danger btn-sm ms-3"
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            setInputs(initializeInput(children))
+                        }}
+                    >
                         Clear
                     </button>
                 </div>

@@ -37,6 +37,7 @@ app.get("/", async (req, res) => {
                 ]
             }
         }
+        // console.log(results)
 
         return res.json(tables)
     })
@@ -79,11 +80,62 @@ app.post("/api/search", async (req, res) => {
     const searchQuery = formatSearch(req.body.checked)
     db.query(searchQuery, (err, results) => {
         if (err) return res.json(err)
-        console.log(results)
+        // console.log(results)
         return res.json(results)
     })
 })
 
+function formatInsert(data) {
+    let tableName = ""
+    let colNames = []
+    let values = []
+    for (const [key, val] of Object.entries(data)) {
+        if (tableName === "") tableName = key.split(".")[0]
+        if (val !== "") {
+            colNames.push(key.split(".")[1])
+            values.push(val)
+        }
+    }
+
+    let s = `INSERT INTO ${tableName} (`
+    for (let i = 0; i < colNames.length; i++) {
+        if (i === colNames.length - 1) {
+            s += colNames[i] + ") "
+        } else {
+            s += colNames[i] + ", "
+        }
+    }
+
+    s += "VALUES ("
+    for (let i = 0; i < values.length; i++) {
+        if (i === values.length - 1) {
+            s += `'${values[i]}'` + ")"
+        } else {
+            s += `'${values[i]}'` + ","
+        }
+    }
+
+    s += ";"
+
+    return s
+}
+
+app.post("/api/insert", async (req, res) => {
+    const insertQuery = formatInsert(req.body)
+    db.query(insertQuery, (err, results) => {
+        if (err) return res.json(err.sqlMessage)
+        return res.json("SUCCESS")
+    })
+})
+
 app.listen(8888, () => {
-    console.log("Connection Success!")
+    db.ping((err) => {
+        if (err) {
+            console.log("Connection Error!")
+            console.log("Have you started Apache and MySQL on XAMPP?")
+            console.log(`Have you created a database in phpMyAdmin with the name: ${databaseName}?`)
+        } else {
+            console.log("Connection Success!")
+        }
+    })
 })

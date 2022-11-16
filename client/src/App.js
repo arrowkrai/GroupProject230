@@ -39,28 +39,32 @@ function App() {
     const [tableChecked, setTableChecked] = useState({ checked: [] })
     const [queryResult, setQueryResult] = useState([])
     const [insertTableName, setInsertTableName] = useState("")
+    const [statusMessage, setStatusMessage] = useState("")
 
-    const handleSearch = (e) => {
+    const fetchQueryResult = async () => {
+        try {
+            const res = await axios.post("http://localhost:8888/api/search", cleanTableChecked(tableChecked))
+            setQueryResult(res.data)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    const handleSearch = async (e) => {
         e.preventDefault()
         setInsertTableName("")
+        setStatusMessage("")
         if (tableChecked.checked.length === 0) {
             // TODO: SHOW ERROR
             // USER PRESSED SEARCH BUT DIDNT SELECT ANY TABLES
         } else {
-            const fetchQueryResult = async () => {
-                try {
-                    const res = await axios.post("http://localhost:8888/api/search", cleanTableChecked(tableChecked))
-                    setQueryResult(res.data)
-                } catch (err) {
-                    console.log(err)
-                }
-            }
-            fetchQueryResult()
+            await fetchQueryResult()
         }
     }
 
     const handleShowInsertForm = (e) => {
         e.preventDefault()
+        setStatusMessage("")
         const tableNames = new Set()
         for (const colName of tableChecked.checked) {
             const cN = colName.split(".")[0]
@@ -73,6 +77,26 @@ function App() {
         } else {
             setInsertTableName(Array.from(tableNames)[0])
         }
+    }
+
+    const handleInsert = (data) => {
+        setStatusMessage("")
+        const fetchInsertResult = async () => {
+            try {
+                const res = await axios.post("http://localhost:8888/api/insert", data)
+
+                if (res.data === "SUCCESS") {
+                    if (tableChecked.checked.length !== 0) await fetchQueryResult()
+                    setInsertTableName("")
+                    setStatusMessage("Successfully Inserted Row!")
+                } else {
+                    setStatusMessage(`Error Inserting Row: ${res.data}`)
+                }
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        fetchInsertResult()
     }
 
     useEffect(() => {
@@ -109,21 +133,34 @@ function App() {
                     <p>Loading tables from database...</p>
                 )}
             </div>
-            {insertTableName !== "" ? (
-                <div>
-                    <>
-                        <Form tables={tables} insertTableName={insertTableName} />
-                    </>
-                </div>
-            ) : (
-                <div>
-                    {queryResult.length > 0 ? (
-                        <Table queryResult={queryResult} />
-                    ) : (
-                        <p className="text-secondary m-3">Search tables</p>
-                    )}
-                </div>
-            )}
+            <div className="w-100">
+                {statusMessage !== "" && (
+                    <div>
+                        {statusMessage !== "Successfully Inserted Row!" ? (
+                            <div className="alert alert-danger" role="alert">
+                                {statusMessage}
+                            </div>
+                        ) : (
+                            <div className="alert alert-success" role="alert">
+                                {statusMessage}
+                            </div>
+                        )}
+                    </div>
+                )}
+                {insertTableName !== "" ? (
+                    <div>
+                        <Form tables={tables} insertTableName={insertTableName} handleInsert={handleInsert} />
+                    </div>
+                ) : (
+                    <div>
+                        {queryResult.length > 0 ? (
+                            <Table queryResult={queryResult} />
+                        ) : (
+                            <p className="text-secondary m-3">Search tables</p>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
