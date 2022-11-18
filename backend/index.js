@@ -23,11 +23,21 @@ app.get("/", async (req, res) => {
 
         for (const result of results) {
             if (tables[result.TABLE_NAME] === undefined) {
-                tables[result.TABLE_NAME] = [result.COLUMN_NAME]
+                tables[result.TABLE_NAME] = [
+                    `${result.COLUMN_NAME}.${result.COLUMN_TYPE}.${
+                        result.IS_NULLABLE === "YES" ? "OPTIONAL" : "REQUIRED"
+                    }`,
+                ]
             } else {
-                tables[result.TABLE_NAME] = [...tables[result.TABLE_NAME], result.COLUMN_NAME]
+                tables[result.TABLE_NAME] = [
+                    ...tables[result.TABLE_NAME],
+                    `${result.COLUMN_NAME}.${result.COLUMN_TYPE}.${
+                        result.IS_NULLABLE === "YES" ? "OPTIONAL" : "REQUIRED"
+                    }`,
+                ]
             }
         }
+        // console.log(results)
 
         return res.json(tables)
     })
@@ -35,17 +45,6 @@ app.get("/", async (req, res) => {
 
 function formatSearch(data) {
     const tables = new Set()
-    // for (const d of data) {
-    //     const textArr = d.split(".")
-    //     // console.log("textArr[0]")
-    //     // console.log(textArr[0])
-    //
-    //     if (tables[textArr[0]] === undefined) {
-    //         tables[textArr[0]] = [textArr[1]]
-    //     } else {
-    //         tables[textArr[0]] = [...tables[textArr[0]], textArr[1]]
-    //     }
-    // }
     for (const d of data) {
         const textArr = d.split(".")
         if (!tables.has(textArr[0])) {
@@ -81,30 +80,62 @@ app.post("/api/search", async (req, res) => {
     const searchQuery = formatSearch(req.body.checked)
     db.query(searchQuery, (err, results) => {
         if (err) return res.json(err)
-        console.log(results)
+        // console.log(results)
         return res.json(results)
-        // return res.json(tables)
     })
+})
 
-    // --------------------------------------------------------------
-    // const tables = {}
-    // const columns = `SELECT * FROM information_schema.columns WHERE table_schema = '${databaseName}'`
-    // db.query(columns, (err, results) => {
-    //     if (err) return res.json(err)
-    //
-    //     for (const result of results) {
-    //         if (tables[result.TABLE_NAME] === undefined) {
-    //             tables[result.TABLE_NAME] = [result.COLUMN_NAME]
-    //         } else {
-    //             tables[result.TABLE_NAME] = [...tables[result.TABLE_NAME], result.COLUMN_NAME]
-    //         }
-    //     }
-    //
-    //     return res.json(tables)
-    // })
-    // --------------------------------------------------------------
+function formatInsert(data) {
+    let tableName = ""
+    let colNames = []
+    let values = []
+    for (const [key, val] of Object.entries(data)) {
+        if (tableName === "") tableName = key.split(".")[0]
+        if (val !== "") {
+            colNames.push(key.split(".")[1])
+            values.push(val)
+        }
+    }
+
+    let s = `INSERT INTO ${tableName} (`
+    for (let i = 0; i < colNames.length; i++) {
+        if (i === colNames.length - 1) {
+            s += colNames[i] + ") "
+        } else {
+            s += colNames[i] + ", "
+        }
+    }
+
+    s += "VALUES ("
+    for (let i = 0; i < values.length; i++) {
+        if (i === values.length - 1) {
+            s += `'${values[i]}'` + ")"
+        } else {
+            s += `'${values[i]}'` + ","
+        }
+    }
+
+    s += ";"
+
+    return s
+}
+
+app.post("/api/insert", async (req, res) => {
+    const insertQuery = formatInsert(req.body)
+    db.query(insertQuery, (err, results) => {
+        if (err) return res.json(err.sqlMessage)
+        return res.json("SUCCESS")
+    })
 })
 
 app.listen(8888, () => {
-    console.log("Connection Success!")
+    db.ping((err) => {
+        if (err) {
+            console.log("Connection Error!")
+            console.log("Have you started Apache and MySQL on XAMPP?")
+            console.log(`Have you created a database in phpMyAdmin with the name: ${databaseName}?`)
+        } else {
+            console.log("Connection Success!")
+        }
+    })
 })
