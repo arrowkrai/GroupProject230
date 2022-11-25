@@ -1,0 +1,8 @@
+/* After dropping, You may need to delete all the table .ibd files in c:/xampp/mysql/data/test3 */
+DROP TABLE dependents;
+DROP TABLE employees;
+DROP TABLE departments;
+DROP TABLE jobs;
+DROP TABLE locations;
+DROP TABLE countries;
+DROP TABLE regions;

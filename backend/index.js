@@ -73,15 +73,25 @@ function formatSearch(data) {
 
     s += ";"
 
-    console.log(s)
     return s
+}
+
+function formatTableName(data) {
+    const s = new Set()
+    for (const tableName of data) {
+        s.add(tableName.split(".")[0])
+    }
+    if (s.size >= 2) {
+        return "__MULTIPLE_TABLES"
+    } else return Array.from(s)[0]
 }
 app.post("/api/search", async (req, res) => {
     const searchQuery = formatSearch(req.body.checked)
+    const tableName = formatTableName(req.body.checked)
     db.query(searchQuery, (err, results) => {
         if (err) return res.json(err)
         // console.log(results)
-        return res.json(results)
+        return res.json({ results, tableName })
     })
 })
 
@@ -123,6 +133,28 @@ function formatInsert(data) {
 app.post("/api/insert", async (req, res) => {
     const insertQuery = formatInsert(req.body)
     db.query(insertQuery, (err, results) => {
+        if (err) return res.json(err.sqlMessage)
+        return res.json("SUCCESS")
+    })
+})
+
+function formatDelete(data) {
+    let s = "DELETE FROM "
+    s += data?.tableName
+    delete data?.tableName
+    s += " WHERE "
+    for (const [key, val] of Object.entries(data)) {
+        s += key + "=" + `'${val}'`
+        s += " AND "
+    }
+    s = s.slice(0, -5)
+    s += ";"
+    return s
+}
+
+app.post("/api/delete", async (req, res) => {
+    const deleteQuery = formatDelete(req.body)
+    db.query(deleteQuery, (err, results) => {
         if (err) return res.json(err.sqlMessage)
         return res.json("SUCCESS")
     })

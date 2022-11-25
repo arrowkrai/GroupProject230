@@ -99,6 +99,25 @@ function App() {
         fetchInsertResult()
     }
 
+    const handleDelete = (data) => {
+        setStatusMessage("")
+        const fetchDeleteResult = async () => {
+            try {
+                const res = await axios.post("http://localhost:8888/api/delete", data)
+                if (res.data === "SUCCESS") {
+                    if (tableChecked.checked.length !== 0) await fetchQueryResult()
+                    setInsertTableName("")
+                    setStatusMessage("Successfully Deleted Row!")
+                } else {
+                    setStatusMessage(`Error Deleting Row: ${res.data}`)
+                }
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        fetchDeleteResult()
+    }
+
     useEffect(() => {
         const fetchColumns = async () => {
             try {
@@ -136,7 +155,7 @@ function App() {
             <div className="w-100">
                 {statusMessage !== "" && (
                     <div>
-                        {statusMessage !== "Successfully Inserted Row!" ? (
+                        {!statusMessage.includes("Successfully") ? (
                             <div className="alert alert-danger" role="alert">
                                 {statusMessage}
                             </div>
@@ -153,8 +172,8 @@ function App() {
                     </div>
                 ) : (
                     <div>
-                        {queryResult.length > 0 ? (
-                            <Table queryResult={queryResult} />
+                        {queryResult?.results?.length > 0 ? (
+                            <Table queryResult={queryResult} handleDelete={handleDelete} tableChecked={tableChecked} />
                         ) : (
                             <p className="text-secondary m-3">Search tables</p>
                         )}
