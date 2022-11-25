@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-function Table({ queryResult, handleDelete }) {
+function Table({ queryResult, handleDelete, handleShowUpdateForm }) {
     // if (!queryResult?.tableName) return <></>
     const tableName = queryResult.tableName
     queryResult = queryResult.results
@@ -26,6 +26,18 @@ function Table({ queryResult, handleDelete }) {
                                     return (
                                         <>
                                             <td key={j}>{v}</td>
+                                            <td
+                                                style={{ cursor: "pointer" }}
+                                                className="text-primary"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    if (window.confirm("Are you sure you want to update?")) {
+                                                        handleShowUpdateForm({ ...q, tableName })
+                                                    }
+                                                }}
+                                            >
+                                                Update
+                                            </td>
                                             <td
                                                 style={{ cursor: "pointer" }}
                                                 className="text-danger"

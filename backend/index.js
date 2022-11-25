@@ -160,6 +160,50 @@ app.post("/api/delete", async (req, res) => {
     })
 })
 
+function formatUpdate(data) {
+    let s = "UPDATE "
+    let tableName = ""
+    const inputs = data.inputs
+    const oldInputs = data.oldInputs
+    for (const [key, val] of Object.entries(inputs)) {
+        if (tableName === "") tableName += key.split(".")[0]
+        if (val === null) {
+            delete inputs[key]
+        }
+    }
+    for (const [key, val] of Object.entries(oldInputs)) {
+        if (tableName === "") tableName += key.split(".")[0]
+        if (val === null) {
+            delete oldInputs[key]
+        }
+    }
+
+    s += tableName
+    s += " SET "
+
+    for (const [key, val] of Object.entries(inputs)) {
+        s += key + "=" + `'${val}'`
+        s += ", "
+    }
+    s = s.slice(0, -2)
+    s += " WHERE "
+    for (const [key, val] of Object.entries(oldInputs)) {
+        s += key + "=" + `'${val}'`
+        s += " AND "
+    }
+    s = s.slice(0, -5)
+    s += ";"
+    return s
+}
+
+app.post("/api/update", async (req, res) => {
+    const updateQuery = formatUpdate(req.body)
+    db.query(updateQuery, (err, results) => {
+        if (err) return res.json(err.sqlMessage)
+        return res.json("SUCCESS")
+    })
+})
+
 app.listen(8888, () => {
     db.ping((err) => {
         if (err) {

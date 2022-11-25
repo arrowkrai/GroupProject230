@@ -40,6 +40,8 @@ function App() {
     const [queryResult, setQueryResult] = useState([])
     const [insertTableName, setInsertTableName] = useState("")
     const [statusMessage, setStatusMessage] = useState("")
+    const [initialFormData, setInitialFormData] = useState({})
+    const [isUserUpdate, setIsUserUpdate] = useState(false)
 
     const fetchQueryResult = async () => {
         try {
@@ -54,9 +56,10 @@ function App() {
         e.preventDefault()
         setInsertTableName("")
         setStatusMessage("")
+        setIsUserUpdate(false)
+        setInitialFormData({})
         if (tableChecked.checked.length === 0) {
-            // TODO: SHOW ERROR
-            // USER PRESSED SEARCH BUT DIDNT SELECT ANY TABLES
+            setStatusMessage(`You must select at least 1 table to search.`)
         } else {
             await fetchQueryResult()
         }
@@ -71,9 +74,7 @@ function App() {
             tableNames.add(cN)
         }
         if (tableNames.size === 0 || tableNames.size >= 2) {
-            // TODO: SHOW ERROR
-            // USER PRESSED SEARCH BUT DIDNT SELECT ANY TABLES
-            // SHOW ERROR IF USER SELECTS MORE THAN ONE TABLE TO INSERT INTO
+            setStatusMessage(`You must select 1 table to insert into. You have selected ${tableNames.size} tables.`)
         } else {
             setInsertTableName(Array.from(tableNames)[0])
         }
@@ -116,6 +117,33 @@ function App() {
             }
         }
         fetchDeleteResult()
+    }
+
+    const handleShowUpdateForm = (data) => {
+        setStatusMessage("")
+        setIsUserUpdate(true)
+        setInsertTableName(data?.tableName)
+        delete data?.tableName
+        setInitialFormData(data)
+    }
+
+    const handleUpdate = (data) => {
+        setStatusMessage("")
+        const fetchUpdateResult = async () => {
+            try {
+                const res = await axios.post("http://localhost:8888/api/update", data)
+                if (res.data === "SUCCESS") {
+                    if (tableChecked.checked.length !== 0) await fetchQueryResult()
+                    setInsertTableName("")
+                    setStatusMessage("Successfully Updated Row!")
+                } else {
+                    setStatusMessage(`Error Updated Row: ${res.data}`)
+                }
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        fetchUpdateResult()
     }
 
     useEffect(() => {
@@ -168,12 +196,25 @@ function App() {
                 )}
                 {insertTableName !== "" ? (
                     <div>
-                        <Form tables={tables} insertTableName={insertTableName} handleInsert={handleInsert} />
+                        <Form
+                            tables={tables}
+                            insertTableName={insertTableName}
+                            handleInsert={handleInsert}
+                            initialFormData={initialFormData}
+                            setInitialFormData={setInitialFormData}
+                            isUserUpdate={isUserUpdate}
+                            handleUpdate={handleUpdate}
+                        />
                     </div>
                 ) : (
                     <div>
                         {queryResult?.results?.length > 0 ? (
-                            <Table queryResult={queryResult} handleDelete={handleDelete} tableChecked={tableChecked} />
+                            <Table
+                                queryResult={queryResult}
+                                handleDelete={handleDelete}
+                                tableChecked={tableChecked}
+                                handleShowUpdateForm={handleShowUpdateForm}
+                            />
                         ) : (
                             <p className="text-secondary m-3">Search tables</p>
                         )}
