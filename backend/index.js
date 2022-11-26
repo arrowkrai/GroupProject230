@@ -15,6 +15,33 @@ const db = mysql.createConnection({
 app.use(express.json())
 app.use(cors())
 
+//DDL Queries, i.e creating our database table structure
+//TODO: Fix SQL errors when creating tables (maybe change order to avoid forgein key problems?)
+app.post("/createTable", async(req, res) => {
+    const DMLArray = []
+
+    const mkChannelTbl = "Create table Channel(channel_id CHAR(20) PRIMARY KEY,account_id CHAR(20 )References Account(account_id)banner_picture MEDIUMBLOB,channel_name VARCHAR(50),subscribers_count INT);"
+    const mkVidTbl = "Create table Video(video_id CHAR(20) Primary key,Length TIME,title VARCHAR(50),description VARCHAR(100),views INT,likes INT,Is_short_style BOOLEAN,channel_id CHAR(20),FOREIGN KEY (channel_id) References Channel(channel_id));"
+    const mkVidCatTbl = "Create table Video-Category(Category VARCHAR(20),video_id CHAR(20) References Video(video_id),PRIMARY KEY (Category, video_id));"
+    const mkVidPlayTbl = "Create table Video-Playlist(playlist_id CHAR(20) References Playlist(playlist_id),video_id CHAR(20) References Video(video_id),PRIMARY KEY (playlist_id, video_id));"
+    const mkPlayTbl = "Create table Playlist(playlist_id CHAR(20) PRIMARY KEY,playlist_name VARCHAR(50),channel_id CHAR(20),FOREIGN KEY (channel_id) References Channel(channel_id));"
+    const mkAccTbl = "Create table Account(account_id CHAR(20) PRIMARY KEY,profile_picture MEDIUMBLOB,username VARCHAR(15),created_on DATE);"
+    const mkCommentTbl = "Create table Comment(comment_id CHAR(20) PRIMARY KEY,Likes INT,Dislikes INT,word VARCHAR(100),channel_id CHAR(20) References Channel(channel_id),video_id CHAR(20) References Video(video_id),);"
+    const mkCommentOnTbl = "Create table Comment_on(commenter_id CHAR(20) References Comment(comment_id),commentee_id CHAR(20),PRIMARY KEY(commenter_id,commentee_id));"
+    const mkSubTbl = "Create table Subscribe_to(subscriber_id CHAR(20) References Channel(channel_id),subscribee_id CHAR(20) References Channel(channel_id),PRIMARY KEY(subscriber_id,subscribee_id));"
+
+    DMLArray.push(mkVidTbl, mkVidCatTbl, mkVidPlayTbl, mkPlayTbl, mkAccTbl, mkCommentTbl, mkCommentOnTbl, mkChannelTbl, mkSubTbl);
+
+    DMLArray.forEach((curQuery) => {
+        db.query(curQuery, (err, result) => {
+            if(err) throw err;
+            console.log("Created Table")
+        })
+    })
+
+    return res.json();
+})
+
 app.get("/", async (req, res) => {
     const tables = {}
     const columns = `SELECT * FROM information_schema.columns WHERE table_schema = '${databaseName}'`
