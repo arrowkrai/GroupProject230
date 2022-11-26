@@ -69,6 +69,42 @@ app.post("/delTable", async(req, res) => {
     return res.json();
 })
 
+//DML Queries START
+
+app.post("/makeAccount", async(req, res) => {
+
+    //TODO: Replace values with req data
+    const id = "12345678901234567890"
+    const profile_pic = "10101000000000110101010100101"
+    const username = "'crazy_guy'"
+    const created_on = "'2012-04-28'"
+
+    const makeAccQuery = "INSERT INTO Account (account_id, profile_picture, username, created_on) VALUES (" + id + "," + profile_pic + "," + username + "," + created_on + ");"
+    
+    db.query(makeAccQuery, (err, result) => {
+        if(err) throw err;
+        console.log("Created Account");
+    })
+    
+    return res.json();
+})
+
+app.get("/seeAccount", async(req, res) => {
+
+    //TODO: Replace id with req data
+    const id = "12345678901234567890"
+    const seeQuery = "SELECT * FROM Account WHERE account_id=" + id + ";"
+
+    db.query(seeQuery, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        return res.json(result);
+    })
+})
+
+
+//DML Queries END
+
 app.get("/", async (req, res) => {
     const tables = {}
     const columns = `SELECT * FROM information_schema.columns WHERE table_schema = '${databaseName}'`
