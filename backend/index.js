@@ -34,7 +34,7 @@ app.post("/createTable", async(req, res) => {
     const mkVidCatTbl = "Create table VideoCategory(Category VARCHAR(20),video_id CHAR(20) References Video(video_id), PRIMARY KEY (Category, video_id));"
     const mkVidPlayTbl = "Create table VideoPlaylist(playlist_id CHAR(20) References Playlist(playlist_id),video_id CHAR(20) References Video(video_id),PRIMARY KEY (playlist_id, video_id));"
     const mkPlayTbl = "Create table Playlist(playlist_id CHAR(20) PRIMARY KEY,playlist_name VARCHAR(50),channel_id CHAR(20),FOREIGN KEY (channel_id) References Channel(channel_id));"
-    const mkAccTbl = "Create table Account(account_id CHAR(20) PRIMARY KEY,profile_picture MEDIUMBLOB,username VARCHAR(15),created_on DATE);"
+    const mkAccTbl = "Create table Account(account_id INT NOT NULL AUTO_INCREMENT,profile_picture MEDIUMBLOB,username VARCHAR(15),created_on DATE, PRIMARY KEY (account_id));"
     const mkCommentTbl = "Create table Comment(comment_id CHAR(20) PRIMARY KEY,Likes INT,Dislikes INT,word VARCHAR(100),channel_id CHAR(20) References Channel(channel_id),video_id CHAR(20) References Video(video_id));"
     const mkCommentOnTbl = "Create table Comment_on(commenter_id CHAR(20) References Comment(comment_id),commentee_id CHAR(20),PRIMARY KEY(commenter_id,commentee_id));"
     const mkSubTbl = "Create table SubscribeTo(subscriber_id CHAR(20) References Channel(channel_id),subscribee_id CHAR(20) References Channel(channel_id),PRIMARY KEY(subscriber_id,subscribee_id));"
@@ -54,7 +54,7 @@ app.post("/createTable", async(req, res) => {
 //Quick delete end point for testing
 app.post("/delTable", async(req, res) => {
     const DMLArray = [];
-    DMLArray.push("Comment_on", "Video-Playlist", "Video Category", "Playlist", "Subscribe_to", "Comment", "Video", "Channel", "Account");
+    DMLArray.push("Comment_on", "VideoPlaylist", "VideoCategory", "Playlist", "SubscribeTo", "Comment", "Video", "Channel", "Account");
 
     DMLArray.forEach((curQuery) => {
         db.query("DROP TABLE " + curQuery + ";", (err, result) => {
@@ -73,13 +73,24 @@ app.post("/delTable", async(req, res) => {
 
 app.post("/makeAccount", async(req, res) => {
 
-    //TODO: Replace values with req data
-    const id = "12345678901234567890"
-    const profile_pic = "10101000000000110101010100101"
-    const username = "'crazy_guy'"
-    const created_on = "'2012-04-28'"
+    //TODO: Replace values with req data, make account_id an account increment value
+    //id is auto incremented
+    var profile_pic = "0"
 
-    const makeAccQuery = "INSERT INTO Account (account_id, profile_picture, username, created_on) VALUES (" + id + "," + profile_pic + "," + username + "," + created_on + ");"
+    var today = new Date();
+    var created_on = String(today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate());
+    created_on = "'" + created_on + "'"; //These extra quotes are needed to make SQL happy about strings
+
+    if(req.query.profile_pic != null){ //if there is picture data
+        profile_pic = req.query.profile_pic;
+    }
+    if(req.query.username == null){ //if there is no username we fail
+        return res.json();
+    }
+    var username = "'" + req.query.username + "'"; //These extra quotes are needed to make SQL happy about strings
+
+
+    const makeAccQuery = "INSERT INTO Account (profile_picture, username, created_on) VALUES (" + profile_pic + "," + username + "," + created_on + ");"
     
     db.query(makeAccQuery, (err, result) => {
         if(err) throw err;
@@ -91,9 +102,13 @@ app.post("/makeAccount", async(req, res) => {
 
 app.get("/seeAccount", async(req, res) => {
 
-    //TODO: Replace id with req data
-    const id = "12345678901234567890"
-    const seeQuery = "SELECT * FROM Account WHERE account_id=" + id + ";"
+    if(req.query.id == null){ //no specific account
+        var seeQuery = "SELECT * FROM Account;"
+    }
+    else { //specific account_id
+        var id = req.query.id;
+        var seeQuery = "SELECT * FROM Account WHERE account_id=" + id + ";"
+    }
 
     db.query(seeQuery, (err, result) => {
         if(err) throw err;
