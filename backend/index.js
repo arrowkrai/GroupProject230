@@ -29,15 +29,15 @@ app.post("/createTable", async(req, res) => {
     Relationship tables depend on the above
     */
 
-    const mkChannelTbl = "Create table Channel(channel_id CHAR(20) PRIMARY KEY,account_id CHAR(20) References Account(account_id), banner_picture MEDIUMBLOB,channel_name VARCHAR(50),subscribers_count INT);"
-    const mkVidTbl = "Create table Video(video_id CHAR(20) Primary key,Length TIME,title VARCHAR(50),description VARCHAR(100),views INT,likes INT,Is_short_style BOOLEAN,channel_id CHAR(20),FOREIGN KEY (channel_id) References Channel(channel_id));"
-    const mkVidCatTbl = "Create table VideoCategory(Category VARCHAR(20),video_id CHAR(20) References Video(video_id), PRIMARY KEY (Category, video_id));"
-    const mkVidPlayTbl = "Create table VideoPlaylist(playlist_id CHAR(20) References Playlist(playlist_id),video_id CHAR(20) References Video(video_id),PRIMARY KEY (playlist_id, video_id));"
-    const mkPlayTbl = "Create table Playlist(playlist_id CHAR(20) PRIMARY KEY,playlist_name VARCHAR(50),channel_id CHAR(20),FOREIGN KEY (channel_id) References Channel(channel_id));"
-    const mkAccTbl = "Create table Account(account_id INT NOT NULL AUTO_INCREMENT,profile_picture MEDIUMBLOB,username VARCHAR(15),created_on DATE, PRIMARY KEY (account_id));"
-    const mkCommentTbl = "Create table Comment(comment_id CHAR(20) PRIMARY KEY,Likes INT,Dislikes INT,word VARCHAR(100),channel_id CHAR(20) References Channel(channel_id),video_id CHAR(20) References Video(video_id));"
-    const mkCommentOnTbl = "Create table Comment_on(commenter_id CHAR(20) References Comment(comment_id),commentee_id CHAR(20),PRIMARY KEY(commenter_id,commentee_id));"
-    const mkSubTbl = "Create table SubscribeTo(subscriber_id CHAR(20) References Channel(channel_id),subscribee_id CHAR(20) References Channel(channel_id),PRIMARY KEY(subscriber_id,subscribee_id));"
+    const mkChannelTbl = "CREATE TABLE Channel(channel_id CHAR(20) PRIMARY KEY, account_id CHAR(20) REFERENCES Account(account_id), banner_picture MEDIUMBLOB, channel_name VARCHAR(50), subscribers_count INT);"
+    const mkVidTbl = "CREATE TABLE Video(video_id CHAR(20) PRIMARY KEY, Length TIME,title VARCHAR(50), description VARCHAR(100), views INT,likes INT, Is_short_style BOOLEAN, channel_id CHAR(20), FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkVidCatTbl = "CREATE TABLE VideoCategory(Category VARCHAR(20), video_id CHAR(20) REFERENCES Video(video_id), PRIMARY KEY (Category, video_id));"
+    const mkVidPlayTbl = "CREATE TABLE VideoPlaylist(playlist_id CHAR(20) REFERENCES Playlist(playlist_id), video_id CHAR(20) REFERENCES Video(video_id), PRIMARY KEY (playlist_id, video_id));"
+    const mkPlayTbl = "CREATE TABLE Playlist(playlist_id CHAR(20) PRIMARY KEY, playlist_name VARCHAR(50), channel_id CHAR(20), FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkAccTbl = "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT, profile_picture MEDIUMBLOB, username VARCHAR(15), created_on DATE, PRIMARY KEY (account_id));"
+    const mkCommentTbl = "CREATE TABLE Comment(comment_id CHAR(20) PRIMARY KEY, Likes INT, Dislikes INT, word VARCHAR(100), channel_id CHAR(20) REFERENCES Channel(channel_id), video_id CHAR(20) REFERENCES Video(video_id));"
+    const mkCommentOnTbl = "CREATE TABLE Comment_on(commenter_id CHAR(20) REFERENCES Comment(comment_id), commentee_id CHAR(20), PRIMARY KEY(commenter_id,commentee_id));"
+    const mkSubTbl = "CREATE TABLE SubscribeTo(subscriber_id CHAR(20) REFERENCES Channel(channel_id), subscribee_id CHAR(20) REFERENCES Channel(channel_id), PRIMARY KEY(subscriber_id,subscribee_id));"
 
     DMLArray.push(mkAccTbl, mkChannelTbl, mkVidTbl, mkCommentTbl, mkSubTbl, mkPlayTbl, mkVidCatTbl, mkVidPlayTbl, mkCommentOnTbl);
 
@@ -51,20 +51,26 @@ app.post("/createTable", async(req, res) => {
     return res.json();
 })
 
-//Quick delete end point for testing
+//Quick delete end point for testing, if tables still exist just call this endpoint again
 app.post("/delTable", async(req, res) => {
-    const DMLArray = [];
-    DMLArray.push("Comment_on", "VideoPlaylist", "VideoCategory", "Playlist", "SubscribeTo", "Comment", "Video", "Channel", "Account");
-
-    DMLArray.forEach((curQuery) => {
-        db.query("DROP TABLE " + curQuery + ";", (err, result) => {
-            if(err){
-                console.log("Table doesn't exist");
-            }
-            else{
-                console.log("Dropped it like its hot")
-            }
-        })
+    //Select all tables in current database
+    db.query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='" + databaseName + "'", (err, result) => {
+        if(err){
+            console.log("Problem getting tables");
+        }
+        else{
+            result.forEach((curQuery) => {
+                db.query("DROP TABLE " + curQuery.TABLE_NAME + ";", (err, result) => {
+                    if(err){
+                        console.log("Could not drop " + curQuery.TABLE_NAME);
+                    }
+                    else{
+                        console.log("Dropped " + curQuery.TABLE_NAME);
+                    }
+                })
+            })
+            return res.json();
+        }
     })
     return res.json();
 })
