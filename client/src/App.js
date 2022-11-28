@@ -43,6 +43,27 @@ function App() {
     const [initialFormData, setInitialFormData] = useState({})
     const [isUserUpdate, setIsUserUpdate] = useState(false)
 
+    const createTables = async () => {
+        try {
+            await axios.post("http://localhost:8888/createTable");
+            window.location.reload();
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    const delTables = async () => {
+        try {
+            await axios.post("http://localhost:8888/delTable");
+            if(tables.length > 0){ //First sweep will miss forgien key constraints
+                await axios.post("http://localhost:8888/delTable");
+            }
+            window.location.reload();
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     const fetchQueryResult = async () => {
         try {
             const res = await axios.post("http://localhost:8888/api/search", cleanTableChecked(tableChecked))
@@ -175,9 +196,20 @@ function App() {
                         >
                             Insert
                         </button>
+                        <button
+                            onClick={delTables}
+                            type="button"
+                            className="btn delBtn btn-primary btn-sm m-3 ms-0 mt-0">
+                            Delete Tables
+                        </button>
                     </>
                 ) : (
-                    <p>Loading tables from database...</p>
+                    <button
+                            onClick={createTables}
+                            type="button"
+                            className="btn createBtn btn-primary btn-sm m-3 ms-0 mt-0">
+                            Create Tables
+                    </button>
                 )}
             </div>
             <div className="w-100">

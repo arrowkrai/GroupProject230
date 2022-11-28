@@ -5,3 +5,15 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+.createBtn {
+    border-color: black;
+    background-color: greenyellow;
+    color: black;
+}
+
+.delBtn {
+    border-color: black;
+    background-color: red;
+    color: black;
+}

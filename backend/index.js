@@ -54,6 +54,8 @@ app.post("/createTable", async(req, res) => {
 //Quick delete end point for testing, if tables still exist just call this endpoint again
 app.post("/delTable", async(req, res) => {
     //Select all tables in current database
+    const restrainedTables = [];
+
     db.query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='" + databaseName + "'", (err, result) => {
         if(err){
             console.log("Problem getting tables");
@@ -63,12 +65,14 @@ app.post("/delTable", async(req, res) => {
                 db.query("DROP TABLE " + curQuery.TABLE_NAME + ";", (err, result) => {
                     if(err){
                         console.log("Could not drop " + curQuery.TABLE_NAME);
+                        restrainedTables.push(curQuery.TABLE_NAME);
                     }
                     else{
                         console.log("Dropped " + curQuery.TABLE_NAME);
                     }
                 })
             })
+        
             return res.json();
         }
     })
