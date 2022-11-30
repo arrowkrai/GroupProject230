@@ -29,15 +29,15 @@ app.post("/createTable", async(req, res) => {
     Relationship tables depend on the above
     */
 
-    const mkChannelTbl = "CREATE TABLE Channel(channel_id CHAR(20) PRIMARY KEY, account_id CHAR(20) REFERENCES Account(account_id), banner_picture MEDIUMBLOB, channel_name VARCHAR(50), subscribers_count INT);"
-    const mkVidTbl = "CREATE TABLE Video(video_id CHAR(20) PRIMARY KEY, Length TIME,title VARCHAR(50), description VARCHAR(100), views INT,likes INT, Is_short_style BOOLEAN, channel_id CHAR(20), FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
-    const mkVidCatTbl = "CREATE TABLE VideoCategory(Category VARCHAR(20), video_id CHAR(20) REFERENCES Video(video_id), PRIMARY KEY (Category, video_id));"
-    const mkVidPlayTbl = "CREATE TABLE VideoPlaylist(playlist_id CHAR(20) REFERENCES Playlist(playlist_id), video_id CHAR(20) REFERENCES Video(video_id), PRIMARY KEY (playlist_id, video_id));"
-    const mkPlayTbl = "CREATE TABLE Playlist(playlist_id CHAR(20) PRIMARY KEY, playlist_name VARCHAR(50), channel_id CHAR(20), FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
-    const mkAccTbl = "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT, profile_picture MEDIUMBLOB, username VARCHAR(15), created_on DATE, PRIMARY KEY (account_id));"
-    const mkCommentTbl = "CREATE TABLE Comment(comment_id CHAR(20) PRIMARY KEY, Likes INT, Dislikes INT, word VARCHAR(100), channel_id CHAR(20) REFERENCES Channel(channel_id), video_id CHAR(20) REFERENCES Video(video_id));"
-    const mkCommentOnTbl = "CREATE TABLE Comment_on(commenter_id CHAR(20) REFERENCES Comment(comment_id), commentee_id CHAR(20), PRIMARY KEY(commenter_id,commentee_id));"
-    const mkSubTbl = "CREATE TABLE SubscribeTo(subscriber_id CHAR(20) REFERENCES Channel(channel_id), subscribee_id CHAR(20) REFERENCES Channel(channel_id), PRIMARY KEY(subscriber_id,subscribee_id));"
+    const mkChannelTbl = "CREATE TABLE Channel(channel_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, account_id INT REFERENCES Account(account_id), channel_name VARCHAR(50), subscribers_count INT);"
+    const mkVidTbl = "CREATE TABLE Video(video_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Length TIME, title VARCHAR(63), description VARCHAR(255), views INT, likes INT, Is_short_style BOOLEAN, channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkVidCatTbl = "CREATE TABLE VideoCategory(Category VARCHAR(20), video_id INT REFERENCES Video(video_id), PRIMARY KEY (Category, video_id));"
+    const mkVidPlayTbl = "CREATE TABLE VideoPlaylist(playlist_id INT REFERENCES Playlist(playlist_id), video_id INT REFERENCES Video(video_id), PRIMARY KEY (playlist_id, video_id));"
+    const mkPlayTbl = "CREATE TABLE Playlist(playlist_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, playlist_name VARCHAR(50), channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkAccTbl = "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(63), created_on DATE);"
+    const mkCommentTbl = "CREATE TABLE Comment(comment_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Likes INT, Dislikes INT, words VARCHAR(100), channel_id INT REFERENCES Channel(channel_id), video_id INT REFERENCES Video(video_id));"
+    const mkCommentOnTbl = "CREATE TABLE Comment_on(commenter_id INT REFERENCES Comment(comment_id), commentee_id INT, PRIMARY KEY(commenter_id,commentee_id));"
+    const mkSubTbl = "CREATE TABLE SubscribeTo(subscriber_id INT REFERENCES Channel(channel_id), subscribee_id INT REFERENCES Channel(channel_id), PRIMARY KEY(subscriber_id,subscribee_id));"
 
     DMLArray.push(mkAccTbl, mkChannelTbl, mkVidTbl, mkCommentTbl, mkSubTbl, mkPlayTbl, mkVidCatTbl, mkVidPlayTbl, mkCommentOnTbl);
 
