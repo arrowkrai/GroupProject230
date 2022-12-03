@@ -46,8 +46,8 @@ function App() {
 
     const createTables = async () => {
         try {
-            await axios.post("http://localhost:8888/createTable");
-            window.location.reload();
+            await axios.post("http://localhost:8888/createTable")
+            window.location.reload()
         } catch (err) {
             console.log(err)
         }
@@ -55,11 +55,12 @@ function App() {
 
     const delTables = async () => {
         try {
-            await axios.post("http://localhost:8888/delTable");
-            if(tables.length > 0){ //First sweep will miss forgien key constraints
-                await axios.post("http://localhost:8888/delTable");
+            await axios.post("http://localhost:8888/delTable")
+            if (tables.length > 0) {
+                //First sweep will miss forgien key constraints
+                await axios.post("http://localhost:8888/delTable")
             }
-            window.location.reload();
+            window.location.reload()
         } catch (err) {
             console.log(err)
         }
@@ -67,7 +68,7 @@ function App() {
 
     const DMLQuery = async (endpoint) => {
         try {
-            const res = await axios.post("http://localhost:8888/" + endpoint, {custQuery : custQuery})
+            const res = await axios.post("http://localhost:8888/" + endpoint, { custQuery: custQuery })
             setQueryResult(res.data)
         } catch (err) {
             console.log(err)
@@ -200,11 +201,6 @@ function App() {
                             Search
                         </button>
 
-                        <button onClick={() => DMLQuery("testQ")} type="button" className="btn btn-primary btn-sm m-3 mt-0">
-                            testQ
-                        </button>
-                        <input placeholder="Enter a custom DML Query Here" value={custQuery} onChange={e => setcustQuery(e.target.value)}/>
-
                         <button
                             onClick={handleShowInsertForm}
                             type="button"
@@ -212,19 +208,43 @@ function App() {
                         >
                             Insert
                         </button>
+
+                        <div className="m-3">
+                            <textarea
+                                className=""
+                                style={{ height: 100 }}
+                                placeholder="Enter SQL query..."
+                                value={custQuery}
+                                onChange={(e) => {
+                                    e.preventDefault()
+                                    setcustQuery(e.target.value)
+                                }}
+                            />
+                            <button onClick={() => DMLQuery("testQ")} type="button" className="btn btn-primary btn-sm">
+                                Submit SQL Query
+                            </button>
+                        </div>
+
                         <button
-                            onClick={delTables}
+                            onClick={(e) => {
+                                e.preventDefault()
+                                if (window.confirm("Are you sure you want to delete all tables?")) {
+                                    delTables()
+                                }
+                            }}
                             type="button"
-                            className="btn delBtn btn-primary btn-sm m-3 ms-0 mt-0">
+                            className="btn delBtn btn-primary btn-sm m-3"
+                        >
                             Delete Tables
                         </button>
                     </>
                 ) : (
                     <button
-                            onClick={createTables}
-                            type="button"
-                            className="btn createBtn btn-primary btn-sm m-3 ms-0 mt-0">
-                            Create Tables
+                        onClick={createTables}
+                        type="button"
+                        className="btn createBtn btn-primary btn-sm m-3 ms-0 mt-0"
+                    >
+                        Create Tables
                     </button>
                 )}
             </div>
@@ -263,10 +283,9 @@ function App() {
                                 tableChecked={tableChecked}
                                 handleShowUpdateForm={handleShowUpdateForm}
                             />
-                        ) : 
-                        <div>
-                            {JSON.stringify(queryResult)}
-                        </div>}
+                        ) : (
+                            <p className="text-secondary m-3">Search tables</p>
+                        )}
                     </div>
                 )}
             </div>

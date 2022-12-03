@@ -16,7 +16,7 @@ app.use(express.json())
 app.use(cors())
 
 //All our DDL Queries, i.e creating our database table structure
-app.post("/createTable", async(req, res) => {
+app.post("/createTable", async (req, res) => {
     const DMLArray = []
 
     /* Order of table creation to avoid refernce errors (change order in DMLArray.push)
@@ -29,111 +29,140 @@ app.post("/createTable", async(req, res) => {
     Relationship tables depend on the above
     */
 
-    const mkChannelTbl = "CREATE TABLE Channel(channel_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, account_id INT REFERENCES Account(account_id), channel_name VARCHAR(50), subscribers_count INT);"
-    const mkVidTbl = "CREATE TABLE Video(video_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Length TIME, title VARCHAR(63), description VARCHAR(255), views INT, likes INT, Is_short_style BOOLEAN, channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
-    const mkVidCatTbl = "CREATE TABLE VideoCategory(Category VARCHAR(20), video_id INT REFERENCES Video(video_id), PRIMARY KEY (Category, video_id));"
-    const mkVidPlayTbl = "CREATE TABLE VideoPlaylist(playlist_id INT REFERENCES Playlist(playlist_id), video_id INT REFERENCES Video(video_id), PRIMARY KEY (playlist_id, video_id));"
-    const mkPlayTbl = "CREATE TABLE Playlist(playlist_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, playlist_name VARCHAR(50), channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
-    const mkAccTbl = "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(63), created_on DATE);"
-    const mkCommentTbl = "CREATE TABLE Comment(comment_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Likes INT, Dislikes INT, words VARCHAR(100), channel_id INT REFERENCES Channel(channel_id), video_id INT REFERENCES Video(video_id));"
-    const mkCommentOnTbl = "CREATE TABLE Comment_on(commenter_id INT REFERENCES Comment(comment_id), commentee_id INT, PRIMARY KEY(commenter_id,commentee_id));"
-    const mkSubTbl = "CREATE TABLE SubscribeTo(subscriber_id INT REFERENCES Channel(channel_id), subscribee_id INT REFERENCES Channel(channel_id), PRIMARY KEY(subscriber_id,subscribee_id));"
+    const mkChannelTbl =
+        "CREATE TABLE Channel(channel_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, account_id INT REFERENCES Account(account_id), channel_name VARCHAR(50), subscribers_count INT);"
+    const mkVidTbl =
+        "CREATE TABLE Video(video_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Length TIME, title VARCHAR(63), description VARCHAR(255), views INT, likes INT, Is_short_style BOOLEAN, channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkVidCatTbl =
+        "CREATE TABLE VideoCategory(Category VARCHAR(100), video_id VARCHAR(100) REFERENCES Video(video_id), PRIMARY KEY (Category, video_id));"
+    const mkVidPlayTbl =
+        "CREATE TABLE VideoPlaylist(playlist_id INT REFERENCES Playlist(playlist_id), video_id INT REFERENCES Video(video_id), PRIMARY KEY (playlist_id, video_id));"
+    const mkPlayTbl =
+        "CREATE TABLE Playlist(playlist_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, playlist_name VARCHAR(50), channel_id INT, FOREIGN KEY (channel_id) REFERENCES Channel(channel_id));"
+    const mkAccTbl =
+        "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(63), created_on DATE);"
+    const mkCommentTbl =
+        "CREATE TABLE Comment(comment_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Likes INT, Dislikes INT, words VARCHAR(100), channel_id INT REFERENCES Channel(channel_id), video_id INT REFERENCES Video(video_id));"
+    const mkCommentOnTbl =
+        "CREATE TABLE Comment_on(commenter_id INT REFERENCES Comment(comment_id), commentee_id INT, PRIMARY KEY(commenter_id,commentee_id));"
+    const mkSubTbl =
+        "CREATE TABLE SubscribeTo(subscriber_id INT REFERENCES Channel(channel_id), subscribee_id INT REFERENCES Channel(channel_id), PRIMARY KEY(subscriber_id,subscribee_id));"
 
-    DMLArray.push(mkAccTbl, mkChannelTbl, mkVidTbl, mkCommentTbl, mkSubTbl, mkPlayTbl, mkVidCatTbl, mkVidPlayTbl, mkCommentOnTbl);
+    DMLArray.push(
+        mkAccTbl,
+        mkChannelTbl,
+        mkVidTbl,
+        mkCommentTbl,
+        mkSubTbl,
+        mkPlayTbl,
+        mkVidCatTbl,
+        mkVidPlayTbl,
+        mkCommentOnTbl
+    )
 
     DMLArray.forEach((curQuery) => {
         db.query(curQuery, (err, result) => {
-            if(err) throw err;
+            if (err) throw err
             console.log("Created Table")
         })
     })
 
-    return res.json();
+    return res.json()
 })
 
 //Quick delete end point for testing, if tables still exist just call this endpoint again
-app.post("/delTable", async(req, res) => {
+app.post("/delTable", async (req, res) => {
     //Select all tables in current database
-    const restrainedTables = [];
+    const restrainedTables = []
 
-    db.query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='" + databaseName + "'", (err, result) => {
-        if(err){
-            console.log("Problem getting tables");
-        }
-        else{
-            result.forEach((curQuery) => {
-                db.query("DROP TABLE " + curQuery.TABLE_NAME + ";", (err, result) => {
-                    if(err){
-                        console.log("Could not drop " + curQuery.TABLE_NAME);
-                        restrainedTables.push(curQuery.TABLE_NAME);
-                    }
-                    else{
-                        console.log("Dropped " + curQuery.TABLE_NAME);
-                    }
+    db.query(
+        "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='" +
+            databaseName +
+            "'",
+        (err, result) => {
+            if (err) {
+                console.log("Problem getting tables")
+            } else {
+                result.forEach((curQuery) => {
+                    db.query("DROP TABLE " + curQuery.TABLE_NAME + ";", (err, result) => {
+                        if (err) {
+                            console.log("Could not drop " + curQuery.TABLE_NAME)
+                            restrainedTables.push(curQuery.TABLE_NAME)
+                        } else {
+                            console.log("Dropped " + curQuery.TABLE_NAME)
+                        }
+                    })
                 })
-            })
-        
-            return res.json();
+
+                return res.json()
+            }
         }
-    })
-    return res.json();
+    )
+    return res.json()
 })
 
 //DML Queries START
 
-app.post("/makeAccount", async(req, res) => {
-
+app.post("/makeAccount", async (req, res) => {
     //TODO: Replace values with req data, make account_id an account increment value
     //id is auto incremented
     var profile_pic = "0"
 
-    var today = new Date();
-    var created_on = String(today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate());
-    created_on = "'" + created_on + "'"; //These extra quotes are needed to make SQL happy about strings
+    var today = new Date()
+    var created_on = String(today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate())
+    created_on = "'" + created_on + "'" //These extra quotes are needed to make SQL happy about strings
 
-    if(req.query.profile_pic != null){ //if there is picture data
-        profile_pic = req.query.profile_pic;
+    if (req.query.profile_pic != null) {
+        //if there is picture data
+        profile_pic = req.query.profile_pic
     }
-    if(req.query.username == null){ //if there is no username we fail
-        return res.json();
+    if (req.query.username == null) {
+        //if there is no username we fail
+        return res.json()
     }
-    var username = "'" + req.query.username + "'"; //These extra quotes are needed to make SQL happy about strings
+    var username = "'" + req.query.username + "'" //These extra quotes are needed to make SQL happy about strings
 
+    const makeAccQuery =
+        "INSERT INTO Account (profile_picture, username, created_on) VALUES (" +
+        profile_pic +
+        "," +
+        username +
+        "," +
+        created_on +
+        ");"
 
-    const makeAccQuery = "INSERT INTO Account (profile_picture, username, created_on) VALUES (" + profile_pic + "," + username + "," + created_on + ");"
-    
     db.query(makeAccQuery, (err, result) => {
-        if(err) throw err;
-        console.log("Created Account");
+        if (err) throw err
+        console.log("Created Account")
     })
-    
-    return res.json();
+
+    return res.json()
 })
 
-app.get("/seeAccount", async(req, res) => {
-
-    if(req.query.id == null){ //no specific account
+app.get("/seeAccount", async (req, res) => {
+    if (req.query.id == null) {
+        //no specific account
         var seeQuery = "SELECT * FROM Account;"
-    }
-    else { //specific account_id
-        var id = req.query.id;
+    } else {
+        //specific account_id
+        var id = req.query.id
         var seeQuery = "SELECT * FROM Account WHERE account_id=" + id + ";"
     }
 
     db.query(seeQuery, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-        return res.json(result);
+        if (err) throw err
+        console.log(result)
+        return res.json(result)
     })
 })
 
-app.post("/testQ", async(req, res) => {
+app.post("/testQ", async (req, res) => {
     const seeQuery = "" + req.body.custQuery
-    console.log(seeQuery);
+    console.log(seeQuery)
     db.query(seeQuery, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-        return res.json(result);
+        if (err) throw err
+        console.log(result)
+        return res.json(result)
     })
 })
 //DML Queries END
