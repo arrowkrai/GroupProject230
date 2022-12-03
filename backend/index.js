@@ -127,9 +127,17 @@ app.get("/seeAccount", async(req, res) => {
     })
 })
 
-
+app.post("/testQ", async(req, res) => {
+    const seeQuery = "SELECT * FROM Account"
+    db.query(seeQuery, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        return res.json(result);
+    })
+})
 //DML Queries END
 
+//Display our database info
 app.get("/", async (req, res) => {
     const tables = {}
     const columns = `SELECT * FROM information_schema.columns WHERE table_schema = '${databaseName}'`
@@ -157,6 +165,8 @@ app.get("/", async (req, res) => {
         return res.json(tables)
     })
 })
+
+//Display database END
 
 function formatSearch(data) {
     const tables = new Set()

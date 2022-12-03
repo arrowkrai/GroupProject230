@@ -64,6 +64,15 @@ function App() {
         }
     }
 
+    const DMLQuery = async (endpoint) => {
+        try {
+            const res = await axios.post("http://localhost:8888/" + endpoint)
+            setQueryResult(res.data)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     const fetchQueryResult = async () => {
         try {
             const res = await axios.post("http://localhost:8888/api/search", cleanTableChecked(tableChecked))
@@ -186,16 +195,19 @@ function App() {
                         <div className="m-3">
                             <Checkboxes tables={tables} setTableChecked={setTableChecked} />
                         </div>
-                        <button onClick={handleSearch} type="button" className="btn btn-primary btn-sm m-3 mt-0">
+                        {/* <button onClick={handleSearch} type="button" className="btn btn-primary btn-sm m-3 mt-0">
                             Search
+                        </button> */}
+                        <button onClick={() => DMLQuery("testQ")} type="button" className="btn btn-primary btn-sm m-3 mt-0">
+                            testQ
                         </button>
-                        <button
+                        {/* <button
                             onClick={handleShowInsertForm}
                             type="button"
                             className="btn btn-primary btn-sm m-3 ms-0 mt-0"
                         >
                             Insert
-                        </button>
+                        </button> */}
                         <button
                             onClick={delTables}
                             type="button"
@@ -247,9 +259,10 @@ function App() {
                                 tableChecked={tableChecked}
                                 handleShowUpdateForm={handleShowUpdateForm}
                             />
-                        ) : (
-                            <p className="text-secondary m-3">Search tables</p>
-                        )}
+                        ) : 
+                        <div>
+                            {JSON.stringify(queryResult)}
+                        </div>}
                     </div>
                 )}
             </div>
