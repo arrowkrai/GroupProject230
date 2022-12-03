@@ -42,6 +42,7 @@ function App() {
     const [statusMessage, setStatusMessage] = useState("")
     const [initialFormData, setInitialFormData] = useState({})
     const [isUserUpdate, setIsUserUpdate] = useState(false)
+    const [custQuery, setcustQuery] = useState("")
 
     const createTables = async () => {
         try {
@@ -66,7 +67,7 @@ function App() {
 
     const DMLQuery = async (endpoint) => {
         try {
-            const res = await axios.post("http://localhost:8888/" + endpoint)
+            const res = await axios.post("http://localhost:8888/" + endpoint, {custQuery : custQuery})
             setQueryResult(res.data)
         } catch (err) {
             console.log(err)
@@ -195,19 +196,22 @@ function App() {
                         <div className="m-3">
                             <Checkboxes tables={tables} setTableChecked={setTableChecked} />
                         </div>
-                        {/* <button onClick={handleSearch} type="button" className="btn btn-primary btn-sm m-3 mt-0">
+                        <button onClick={handleSearch} type="button" className="btn btn-primary btn-sm m-3 mt-0">
                             Search
-                        </button> */}
+                        </button>
+
                         <button onClick={() => DMLQuery("testQ")} type="button" className="btn btn-primary btn-sm m-3 mt-0">
                             testQ
                         </button>
-                        {/* <button
+                        <input placeholder="Enter a custom DML Query Here" value={custQuery} onChange={e => setcustQuery(e.target.value)}/>
+
+                        <button
                             onClick={handleShowInsertForm}
                             type="button"
                             className="btn btn-primary btn-sm m-3 ms-0 mt-0"
                         >
                             Insert
-                        </button> */}
+                        </button>
                         <button
                             onClick={delTables}
                             type="button"

@@ -128,7 +128,8 @@ app.get("/seeAccount", async(req, res) => {
 })
 
 app.post("/testQ", async(req, res) => {
-    const seeQuery = "SELECT * FROM Account"
+    const seeQuery = "" + req.body.custQuery
+    console.log(seeQuery);
     db.query(seeQuery, (err, result) => {
         if(err) throw err;
         console.log(result);
