@@ -1,10 +1,9 @@
-DROP TABLE subscribeto;
-DROP TABLE comment_on;
-DROP TABLE comment;
-DROP TABLE videoplaylist;
-DROP TABLE videocategory;
-DROP TABLE account;
-DROP TABLE playlist;
-DROP TABLE video;
-DROP TABLE channel;
-
+DROP TABLE Subscribeto;
+DROP TABLE Comment_on;
+DROP TABLE Comment;
+DROP TABLE Videoplaylist;
+DROP TABLE Videocategory;
+DROP TABLE Account;
+DROP TABLE Playlist;
+DROP TABLE Video;
+DROP TABLE Channel;

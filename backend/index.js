@@ -1,6 +1,7 @@
 import express from "express"
 import mysql from "mysql2"
 import cors from "cors"
+import * as fs from "fs"
 
 const app = express()
 
@@ -42,7 +43,7 @@ app.post("/createTable", async (req, res) => {
     const mkAccTbl =
         "CREATE TABLE Account(account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(63), created_on DATE);"
     const mkCommentTbl =
-        "CREATE TABLE Comment(comment_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Likes INT, Dislikes INT, words VARCHAR(100), channel_id INT REFERENCES Channel(channel_id), video_id INT REFERENCES Video(video_id));"
+        "CREATE TABLE Comment(comment_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, Likes INT, Dislikes INT, words VARCHAR(512), channel_id INT REFERENCES Channel(channel_id), video_id INT REFERENCES Video(video_id));"
     const mkCommentOnTbl =
         "CREATE TABLE Comment_on(commenter_id INT REFERENCES Comment(comment_id), commentee_id INT, PRIMARY KEY(commenter_id,commentee_id));"
     const mkSubTbl =
@@ -164,6 +165,20 @@ app.post("/testQ", async (req, res) => {
         console.log(result)
         return res.json(result)
     })
+})
+
+app.post("/loadData", async (req, res) => {
+    const fileQuery = fs.readFileSync('../sql-load-data.sql').toString();
+    const seeQuery = fileQuery.split(';');
+
+    seeQuery.forEach((curQuery) => {
+        db.query(curQuery, (err, result) => {
+            if (err) throw err
+            console.log(result)
+        })
+    })
+
+    return res
 })
 //DML Queries END
 

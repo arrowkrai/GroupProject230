@@ -225,6 +225,10 @@ function App() {
                             </button>
                         </div>
 
+                        <button onClick={() => DMLQuery("loadData")} type="button" className="btn btn-primary btn-sm m-3">
+                                Load Dummy Data
+                        </button>
+
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
