@@ -161,15 +161,14 @@ app.post("/testQ", async (req, res) => {
     const seeQuery = "" + req.body.custQuery
     console.log(seeQuery)
     db.query(seeQuery, (err, result) => {
-        if (err) throw err
-        console.log(result)
-        return res.json(result)
+        if (err) return res.json(err.sqlMessage)
+        return res.json({ results: result, tableName: "__MULTIPLE_TABLES" })
     })
 })
 
 app.post("/loadData", async (req, res) => {
-    const fileQuery = fs.readFileSync('../sql-load-data.sql').toString();
-    const seeQuery = fileQuery.split(';');
+    const fileQuery = fs.readFileSync("../sql-load-data.sql").toString()
+    const seeQuery = fileQuery.split(";")
 
     seeQuery.forEach((curQuery) => {
         db.query(curQuery, (err, result) => {

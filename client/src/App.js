@@ -69,7 +69,13 @@ function App() {
     const DMLQuery = async (endpoint) => {
         try {
             const res = await axios.post("http://localhost:8888/" + endpoint, { custQuery: custQuery })
-            setQueryResult(res.data)
+            if (res.data.hasOwnProperty("results")) {
+                setInsertTableName("")
+                setStatusMessage("Successfully Ran Query!")
+                setQueryResult(res.data)
+            } else {
+                setStatusMessage(`Error: ${res.data}`)
+            }
         } catch (err) {
             console.log(err)
         }
@@ -225,8 +231,12 @@ function App() {
                             </button>
                         </div>
 
-                        <button onClick={() => DMLQuery("loadData")} type="button" className="btn btn-primary btn-sm m-3">
-                                Load Dummy Data
+                        <button
+                            onClick={() => DMLQuery("loadData")}
+                            type="button"
+                            className="btn btn-primary btn-sm m-3"
+                        >
+                            Load Dummy Data
                         </button>
 
                         <button
